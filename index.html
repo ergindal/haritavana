@@ -99,8 +99,8 @@ body{font-family:Arial,sans-serif;background:#1a1a2e;color:#fff;overflow:hidden;
 <script>
 const IMG_W=3332, IMG_H=2084;
 const DP=[
-  {v:1,s:23,a:348,px:46.053247941445555,py:26.926900584795316,rot:0},{v:2,s:15,a:241,px:46.05114364135407,py:29.449122807017545,rot:0},
-  {v:3,s:8,a:133,px:45.50009149130833,py:37.27309941520468,rot:0},{v:4,s:12,a:117,px:44.80860018298262,py:40.041520467836264,rot:0},
+  {v:1,s:23,a:348,px:46.73911899768699,py:27.51169590643274,rot:91},{v:2,s:15,a:241,px:46.72023994197934,py:29.490169166343833,rot:91},
+  {v:3,s:8,a:133,px:47.078000761525296,py:36.852489530872404,rot:97},{v:4,s:12,a:117,px:46.54343458638302,py:38.47945283819434,rot:466},
   {v:5,s:29,a:277,px:59.62150045745654,py:46.78830409356725,rot:0},{v:6,s:29,a:285,px:60.7868029953328,py:45.1478425295626,rot:0},
   {v:7,s:14,a:121,px:61.90061535574238,py:43.907713025992955,rot:0},{v:8,s:23,a:211,px:67.01299176578223,py:51.40350877192984,rot:0},
   {v:9,s:10,a:59,px:65.53000914913085,py:52.99415204678362,rot:0},{v:10,s:23,a:153,px:69.2646942800789,py:56.95972660357519,rot:0},
@@ -113,7 +113,7 @@ const DP=[
   {v:23,s:16,a:172,px:47.96022353714662,py:73.18033648790745,rot:0},{v:24,s:15,a:159,px:46.6491781722551,py:72.82881177707678,rot:0},
   {v:25,s:10,a:99,px:47.10276134122288,py:74.8154574132492,rot:0},{v:26,s:20,a:179,px:28.796120973044047,py:79.33701366982125,rot:0},
   {v:27,s:19,a:135,px:27.39335963182117,py:79.94121976866457,rot:0},{v:28,s:24,a:242,px:27.79447731755424,py:78.0751840168244,rot:0},
-  {v:29,s:14,a:198,px:44.7,py:8.4,rot:0}
+  {v:29,s:14,a:198,px:50.99027988352224,py:24.395630461922597,rot:196}
 ];
 
 let pos=JSON.parse(JSON.stringify(DP));
@@ -204,17 +204,20 @@ function drag(el,i){
   }
   el.addEventListener("mousedown",function(e){
     if(e.target.classList.contains("rh"))return;
-    e.preventDefault();let moved=false;start(e.clientX,e.clientY);
-    const om=e=>{moved=true;move(e.clientX,e.clientY);};
-    const ou=()=>{el.classList.remove("dragging");if(!moved&&e.target.closest(".mbadge"))el.classList.toggle("pinned");document.removeEventListener("mousemove",om);document.removeEventListener("mouseup",ou);};
-    document.addEventListener("mousemove",om);document.addEventListener("mouseup",ou);
+    e.preventDefault();
+    const ou=()=>{if(e.target.closest(".mbadge"))el.classList.toggle("pinned");document.removeEventListener("mouseup",ou);};
+    document.addEventListener("mouseup",ou);
   });
   el.addEventListener("touchstart",function(e){
     if(e.target.classList.contains("rh"))return;
-    e.preventDefault();let moved=false;const tgt=e.target;const t=e.touches[0];start(t.clientX,t.clientY);
-    const om=e=>{moved=true;const t=e.touches[0];move(t.clientX,t.clientY);};
-    const oe=()=>{el.classList.remove("dragging");if(!moved&&tgt.closest(".mbadge"))el.classList.toggle("pinned");document.removeEventListener("touchmove",om);document.removeEventListener("touchend",oe);};
-    document.addEventListener("touchmove",om,{passive:false});document.addEventListener("touchend",oe);
+    if(e.touches.length>1)return;
+    e.preventDefault();
+    const tgt=e.target;
+    const oe=()=>{
+      if(tgt.closest(".mbadge"))el.classList.toggle("pinned");
+      document.removeEventListener("touchend",oe);
+    };
+    document.addEventListener("touchend",oe);
   },{passive:false});
 }
 
