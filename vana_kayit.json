@@ -236,16 +236,16 @@
   "gScale": 1.05,
   "gFont": 13,
   "gColor": "#00BFFF",
-  "islemTipi": "gubre",
+  "islemTipi": "sulama",
   "karisim": [
     {
-      "ad": "DRT Doktor Tarsa Magnezyum Sülfat Damlama Gübresi",
-      "miktar": 50,
-      "birim": "g"
+      "ad": "",
+      "miktar": 0,
+      "birim": "ml"
     },
     {
-      "ad": "Fulvera hümik asit",
-      "miktar": 100,
+      "ad": "",
+      "miktar": 0,
       "birim": "ml"
     },
     {
