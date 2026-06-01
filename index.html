@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ADA1 - Vana Haritası</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Arial,sans-serif;background:#1a1a2e;color:#fff;overflow:hidden;height:100vh;}
@@ -59,16 +60,83 @@ body{font-family:Arial,sans-serif;background:#1a1a2e;color:#fff;overflow:hidden;
 #kunye-panel .kp-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;gap:20px;}
 #kunye-panel .kp-rl{font-size:10px;color:rgba(255,255,255,0.45);letter-spacing:1px;text-transform:uppercase;}
 #kunye-panel .kp-rv{font-size:13px;color:#fff;font-weight:700;}
+#kunye-panel .kp-gubre-item .kp-gubre-ad{font-size:10px;color:rgba(255,255,255,0.6);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#kunye-panel .kp-gubre-item .kp-gubre-kg{font-size:12px;color:#7fd4ff;font-weight:700;}
+.btn.gh{background:linear-gradient(135deg,#1a1a2e,#16213e);color:#c9d1d9;border:1px solid #30363d;}
+.btn.gh:hover{background:#21262d;}
+.gecmis-kayit{padding:10px;margin-bottom:8px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(0,191,255,0.15);}
+.gecmis-kayit .gk-baslik{font-size:11px;color:#00BFFF;font-weight:700;margin-bottom:4px;}
+.gecmis-kayit .gk-detay{font-size:11px;color:rgba(255,255,255,0.7);line-height:1.6;}
+.gecmis-kayit .gk-tarih{font-size:10px;color:rgba(255,255,255,0.35);margin-top:4px;}
+
+.btn.s{background:linear-gradient(135deg,#1a6b3a,#0f4a28);color:#7fff7f;border:1px solid #2dcc70;}
+.btn.s:hover{background:linear-gradient(135deg,#22884a,#155c33);}
+.btn.k{background:linear-gradient(135deg,#1a3a6b,#0f284a);color:#7fbfff;border:1px solid #2d7acc;}
+.btn.k:hover{background:linear-gradient(135deg,#224488,#153366);}
+.btn.k:disabled{opacity:0.35;cursor:not-allowed;}
+
+.btn.s:hover{background:linear-gradient(135deg,#22884a,#155c33);}
+#topbar select{background:#0d2a45;color:#fff;border:1px solid rgba(0,191,255,0.4);border-radius:6px;padding:3px 6px;font-size:12px;cursor:pointer;max-width:140px;}
+#topbar select:disabled{opacity:0.35;cursor:not-allowed;}
+#topbar input[type=number]{background:#0d2a45;color:#fff;border:1px solid rgba(0,191,255,0.4);border-radius:6px;padding:3px 6px;font-size:12px;width:60px;}
+#topbar input[type=number]:disabled{opacity:0.35;}
+
 </style>
 </head>
-<body><div id="kunye-panel"><span class="kp-label">VANA KUNYE</span><div class="kp-vno" id="kp-vno">V1</div><div class="kp-divider"></div><div class="kp-row"><span class="kp-rl">SIRA</span><span class="kp-rv" id="kp-sira">-</span></div><div class="kp-row"><span class="kp-rl">AGAC</span><span class="kp-rv" id="kp-agac">-</span></div></div>
+<body><!-- GitHub Sync Panel -->
+<div id="gh-panel" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:99998;align-items:center;justify-content:center;">
+<div style="background:linear-gradient(135deg,#0a1628,#0d2a45);border:1px solid rgba(0,191,255,0.4);border-radius:16px;padding:24px;width:360px;max-width:95vw;box-shadow:0 16px 48px rgba(0,0,0,0.8);">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+<span style="color:#00BFFF;font-weight:900;font-size:15px;">🔗 GITHUB SYNC</span>
+<button onclick="ghPanelKapat()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;">&times;</button>
+</div>
+<div style="margin-bottom:10px;">
+<label style="color:rgba(0,191,255,0.7);font-size:10px;letter-spacing:1px;">KULLANICI ADI</label>
+<input id="gh-kullanici" placeholder="Adınız (zorunlu)" style="width:100%;margin-top:4px;background:#0d2a45;color:#fff;border:1px solid rgba(0,191,255,0.4);border-radius:6px;padding:8px;font-size:13px;">
+</div>
+<div style="margin-bottom:10px;">
+<label style="color:rgba(0,191,255,0.7);font-size:10px;letter-spacing:1px;">GITHUB TOKEN</label>
+<input id="gh-token" type="password" placeholder="ghp_xxxx..." style="width:100%;margin-top:4px;background:#0d2a45;color:#fff;border:1px solid rgba(0,191,255,0.4);border-radius:6px;padding:8px;font-size:13px;">
+</div>
+<div style="margin-bottom:10px;">
+<label style="color:rgba(0,191,255,0.7);font-size:10px;letter-spacing:1px;">REPO (kullanici/repo)</label>
+<input id="gh-repo" placeholder="kullanici/erturan-tarim" style="width:100%;margin-top:4px;background:#0d2a45;color:#fff;border:1px solid rgba(0,191,255,0.4);border-radius:6px;padding:8px;font-size:13px;">
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">
+<button class="btn g" style="flex:1" onclick="ghSyncYukle()">⬇️ Yükle</button>
+<button class="btn b" style="flex:1" onclick="ghSyncKaydet()">⬆️ Kaydet</button>
+<button class="btn r" style="flex:1" onclick="ghPanelKapat()">Kapat</button>
+</div>
+<div id="gh-durum" style="margin-top:12px;font-size:11px;color:rgba(255,255,255,0.5);min-height:16px;"></div>
+</div></div>
+<!-- GitHub Gecmis Modal -->
+<div id="gecmis-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:99997;align-items:center;justify-content:center;">
+<div style="background:linear-gradient(135deg,#0a1628,#0d2a45);border:1px solid rgba(0,191,255,0.4);border-radius:16px;padding:24px;width:420px;max-width:95vw;max-height:80vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,0.8);">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+<span style="color:#00BFFF;font-weight:900;font-size:15px;">📋 GÜBRE GEÇMİŞİ</span>
+<button onclick="document.getElementById('gecmis-modal').style.display='none'" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;">&times;</button>
+</div>
+<div id="gecmis-liste"></div>
+</div></div>
+<div id="karisim-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:99999;align-items:center;justify-content:center;"><div style="background:linear-gradient(135deg,#0a1628,#0d2a45);border:1px solid rgba(0,191,255,0.4);border-radius:16px;padding:24px;min-width:340px;max-width:95vw;box-shadow:0 16px 48px rgba(0,0,0,0.8);"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><span style="color:#00BFFF;font-weight:900;font-size:15px;letter-spacing:1px;">🧪 KARİŞİM DÜZENLE</span><button onclick="karisimPanelKapat()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;">&times;</button></div><div id="karisim-satirlar"></div><div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;"><button class="btn g" onclick="karisimKaydet()">✔ Uygula</button><button class="btn r" onclick="karisimPanelKapat()">Vazgeç</button></div></div></div>
+<div id="kunye-panel"><span class="kp-label">VANA KUNYE</span><div class="kp-vno" id="kp-vno">V1</div><div class="kp-divider"></div><div class="kp-row"><span class="kp-rl">SIRA</span><span class="kp-rv" id="kp-sira">-</span></div><div class="kp-row"><span class="kp-rl">AGAC</span><span class="kp-rv" id="kp-agac">-</span></div><div id="kp-gubre-rows"></div>
+<div id="kp-yapildi-row" style="display:none;margin-top:8px;gap:6px;flex-direction:column;">
+<div id="kp-son-yapilan" style="font-size:10px;color:rgba(0,191,255,0.6);padding:4px 0;"></div>
+<button class="btn g" style="width:100%;font-size:11px;padding:5px;" onclick="gubreYapildi()">✅ Gübre Yapıldı</button>
+<button class="btn b" style="width:100%;font-size:11px;padding:5px;" onclick="gecmisGoster()">📋 Geçmişi Gör</button>
+</div>
+</div>
 <div id="topbar">
   <h1>ADA1</h1>
-  
+  <div class="cg"><label>Işlem</label><select id="islemSelect" onchange="islemDegisti()"><option value="sulama">Sadece Sulama</option><option value="gubre">Gübreleme Yap</option></select></div>
+  <button class="btn k" id="karisimBtn" disabled onclick="karisimPanelAc()">🧪 Karışım Düzenle</button>
   <div class="cg"><label>Yazı</label><input type="range" id="fontSlider" min="8" max="22" step="1" value="13"><span id="fontVal">13px</span></div>
   <div class="cg"><label>Renk</label><input type="color" id="colorPicker" value="#00BFFF" style="width:26px;height:22px;border:none;border-radius:4px;cursor:pointer;"></div>
   <button class="btn g" onclick="saveJSON()">💾 Kaydet</button>
   <button class="btn b" onclick="document.getElementById('fileInput').click()">📂 Yükle</button>
+  <button class="btn s" onclick="document.getElementById('stokInput').click()">🌿 Stok Yükle</button>
+  <button class="btn gh" onclick="ghPanelAc()">🔗 GitHub Sync</button>
+  <input type="file" id="stokInput" accept=".json,.xlsx,.xls,.csv" style="display:none" onchange="loadStok(event)">
   <button class="btn o" id="dlBtn" onclick="downloadMap()">⬇ PNG</button>
   <button class="btn r" onclick="doReset()">↺ Sıfırla</button>
   <input type="file" id="fileInput" accept=".json" style="display:none" onchange="loadJSON(event)">
@@ -128,6 +196,20 @@ const DP=[
 
 let pos=JSON.parse(JSON.stringify(DP));
 let gScale=1.05,gFont=13,gColor="#00BFFF",mZoom=1;
+const GUBRE_LIST=[
+  {ad:"DAP",stok:5000},
+  {ad:"Amonyum S�lf�t",stok:8000},
+  {ad:"Potasyum Nitrat",stok:3000},
+  {ad:"Mono Amonyum Fosfat",stok:2500},
+  {ad:"Kalsiyum Nitrat",stok:4000},
+  {ad:"Magnezyum S�lf�t",stok:1500}
+];
+let islemTipi="sulama";
+let ghKullanici=localStorage.getItem("ghKullanici")||"";
+let ghToken=localStorage.getItem("ghToken")||"";
+let ghRepo=localStorage.getItem("ghRepo")||"";
+let gubreGecmisi=[];
+let karisim=[{ad:"",miktar:0,birim:"ml"},{ad:"",miktar:0,birim:"ml"},{ad:"",miktar:0,birim:"ml"}];
 
 const scroller=document.getElementById("scroller");
 const mw=document.getElementById("mw");
@@ -201,17 +283,411 @@ document.getElementById("colorPicker").addEventListener("input",function(){gColo
 function updateKunye(el,i){
   var panel=document.getElementById('kunye-panel');
   if(el.classList.contains('pinned')){
-    // Onceki pinned'i kapat
     document.querySelectorAll('.marker.pinned').forEach(function(other){
       if(other!==el) other.classList.remove('pinned');
     });
     document.getElementById('kp-vno').textContent='V'+pos[i].v;
     document.getElementById('kp-sira').textContent=pos[i].s;
     document.getElementById('kp-agac').textContent=pos[i].a;
+    kunyeGubre(pos[i].a);
+    document.getElementById("kp-yapildi-row").style.display="flex";
+    sonYapilanGoster(pos[i].v);
     panel.classList.add('visible');
   } else {
+    document.getElementById("kp-yapildi-row").style.display="none";
     panel.classList.remove('visible');
   }
+}
+function kunyeGubre(agacSayisi){
+  var cont=document.getElementById('kp-gubre-rows');
+  cont.innerHTML="";
+  var aktifler=karisim.filter(function(k){return k.ad&&k.miktar>0;});
+  if(islemTipi==='gubre'&&aktifler.length>0){
+    // Her urun ayri satir
+    aktifler.forEach(function(k){
+      var sonuc=hesaplaToplamMiktar(k, agacSayisi);
+      var row=document.createElement("div");
+      row.className="kp-row kp-gubre-item";
+      row.innerHTML='<span class="kp-rl kp-gubre-ad"></span><span class="kp-rv kp-gubre-kg"></span>';
+      var adSpan=row.querySelector(".kp-gubre-ad");
+      adSpan.innerHTML='<span style="display:block;font-size:10px;opacity:0.9"></span>'
+        +'<span style="display:block;font-size:9px;opacity:0.5"></span>';
+      adSpan.querySelector("span:first-child").textContent=k.ad;
+      adSpan.querySelector("span:last-child").textContent=birimLabel(k);
+      row.querySelector(".kp-gubre-kg").textContent=sonuc.deger+" "+sonuc.birim;
+      cont.appendChild(row);
+    });
+    // Toplam satiri
+    var toplamStr=hesaplaToplam(aktifler,agacSayisi);
+    var divider=document.createElement("div");
+    divider.style.cssText="height:1px;background:linear-gradient(90deg,rgba(0,191,255,0.2),transparent);margin:4px 0;";
+    cont.appendChild(divider);
+    var total=document.createElement("div");
+    total.className="kp-row";
+    total.innerHTML='<span class="kp-rl" style="color:rgba(0,191,255,0.8)">TOPLAM</span><span class="kp-rv" style="color:#00BFFF"></span>';
+    total.querySelector(".kp-rv").textContent=toplamStr;
+    cont.appendChild(total);
+  } else if(islemTipi==='gubre'){
+    var row=document.createElement("div");
+    row.className="kp-row";
+    row.innerHTML='<span class="kp-rl">GÜBRE</span><span class="kp-rv" style="opacity:0.5">Karışım seçilmedi</span>';
+    cont.appendChild(row);
+  }
+}
+function kunyeGuncelle(){
+  var pinned=document.querySelector('.marker.pinned');
+  if(pinned){var i=parseInt(pinned.dataset.i);kunyeGubre(pos[i].a);}
+}
+function islemDegisti(){
+  islemTipi=document.getElementById('islemSelect').value;
+  var aktif=islemTipi==='gubre';
+  document.getElementById('karisimBtn').disabled=!aktif;
+  kunyeGuncelle();
+}
+function loadStok(e){
+  var file=e.target.files[0];if(!file)return;
+  var ext=file.name.split(".").pop().toLowerCase();
+  if(ext==="json"){
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      try{
+        var data=JSON.parse(ev.target.result);
+        stokUygula(data);
+      }catch(err){toast("✕ JSON hatası: "+err.message);}
+      document.getElementById("stokInput").value="";
+    };
+    reader.readAsText(file);
+  } else {
+    // Excel / CSV
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      try{
+        var wb=XLSX.read(ev.target.result,{type:"array"});
+        var ws=wb.Sheets[wb.SheetNames[0]];
+        var rows=XLSX.utils.sheet_to_json(ws,{defval:""});
+        stokUygula(rows);
+      }catch(err){toast("✕ Excel hatası: "+err.message);}
+      document.getElementById("stokInput").value="";
+    };
+    reader.readAsArrayBuffer(file);
+  }
+}
+function stokUygula(rows){
+  if(!Array.isArray(rows)||rows.length===0){
+    toast("✕ Geçersiz veri - satır bulunamadı");
+    return;
+  }
+  GUBRE_LIST.length=0;
+  rows.forEach(function(g){
+    var ad=String(g["ad"]||g["Ad"]||g["Ürün Adı"]||g["urun_adi"]||g["Gübre"]||g["gubre"]||g["name"]||g["Name"]||g["isim"]||"").trim();
+    var stok=parseFloat(g["stok"]||g["Stok"]||g["Adet"]||g["adet"]||g["miktar"]||g["Miktar"]||g["amount"]||g["Amount"]||0);
+    var durum=g["Durum"]||g["durum"]||"";
+    if(ad) GUBRE_LIST.push({ad:ad,stok:stok,durum:durum});
+  });
+  if(GUBRE_LIST.length===0){toast("✕ Sütun isimleri tanınamadı");return;}
+  gubreListesiDoldur();
+  toast("✓ "+GUBRE_LIST.length+" gübre yüklendi");
+}
+function karisimPanelAc(){
+  var modal=document.getElementById("karisim-modal");
+  modal.style.display="flex";
+  karisimSatirlariCiz();
+}
+function karisimPanelKapat(){
+  document.getElementById("karisim-modal").style.display="none";
+}
+var BIRIMLER=[
+  {v:"ml", lbl:"ml", tip:"hacim", carpan:1,    sonucBirim:"ml"},
+  {v:"cl", lbl:"cl", tip:"hacim", carpan:10,   sonucBirim:"ml"},
+  {v:"dl", lbl:"dl", tip:"hacim", carpan:100,  sonucBirim:"ml"},
+  {v:"l",  lbl:"L",  tip:"hacim", carpan:1,    sonucBirim:"L"},
+  {v:"cc", lbl:"cc", tip:"hacim", carpan:1,    sonucBirim:"ml"},
+  {v:"g",  lbl:"g",  tip:"kuru",  carpan:1,    sonucBirim:"g"},
+  {v:"kg", lbl:"kg", tip:"kuru",  carpan:0.001,sonucBirim:"kg"}
+];
+// Her urunu kendi sonuc birimi cinsinden hesapla
+function hesaplaToplamMiktar(k, agacSayisi){
+  var b=BIRIMLER.find(function(x){return x.v===k.birim;})||BIRIMLER[0];
+  var hamSonuc=(k.miktar||0)*b.carpan*agacSayisi;
+  // Buyuk degerlerde ust birime gec
+  if(b.sonucBirim==="ml" && hamSonuc>=1000){
+    return {deger:(hamSonuc/1000).toFixed(2), birim:"L"};
+  } else if(b.sonucBirim==="g" && hamSonuc>=1000){
+    return {deger:(hamSonuc/1000).toFixed(2), birim:"kg"};
+  } else if(b.sonucBirim==="L"){
+    return {deger:hamSonuc.toFixed(2), birim:"L"};
+  } else if(b.sonucBirim==="kg"){
+    return {deger:(hamSonuc*1000).toFixed(0), birim:"g"};
+  } else {
+    return {deger:hamSonuc.toFixed(1), birim:b.sonucBirim};
+  }
+}
+// Toplam icin hepsini ml veya g cinsine cevir, sonra formatla
+function hesaplaToplam(aktifler, agacSayisi){
+  var topHacim=0, topKuru=0;
+  aktifler.forEach(function(k){
+    var b=BIRIMLER.find(function(x){return x.v===k.birim;})||BIRIMLER[0];
+    var mlEsit=["ml","cl","dl","l","cc"];
+    if(mlEsit.indexOf(b.v)>=0){
+      topHacim+=(k.miktar||0)*b.carpan*agacSayisi;
+    } else {
+      topKuru+=(k.miktar||0)*b.carpan*agacSayisi;
+    }
+  });
+  var sonuclar=[];
+  if(topHacim>0) sonuclar.push(topHacim>=1000?(topHacim/1000).toFixed(2)+" L":topHacim.toFixed(1)+" ml");
+  if(topKuru>0) sonuclar.push(topKuru>=1?(topKuru).toFixed(2)+" kg":( topKuru*1000).toFixed(0)+" g");
+  return sonuclar.join(" + ")||"-";
+}
+function birimLabel(k){
+  return (k.miktar||0)+" "+(k.birim||"ml")+"/ağaç";
+}
+function karisimSatirlariCiz(){
+  var cont=document.getElementById("karisim-satirlar");
+  cont.innerHTML="";
+  var IST="background:#0d2a45;color:#fff;border:1px solid rgba(0,191,255,0.4);border-radius:6px;padding:4px 6px;font-size:12px;";
+  var sayilar=["1. Ürün","2. Ürün","3. Ürün"];
+  karisim.forEach(function(k,i){
+    var row=document.createElement("div");
+    row.style.cssText="display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;";
+    // Etiket
+    var lbl=document.createElement("span");
+    lbl.textContent=sayilar[i];
+    lbl.style.cssText="color:rgba(0,191,255,0.7);font-size:11px;width:52px;flex-shrink:0;";
+    // Urun secimi
+    var sel=document.createElement("select");
+    sel.style.cssText=IST+"flex:1;min-width:100px;";
+    var eo=document.createElement("option");
+    eo.value="";eo.textContent="-- Seç --";sel.appendChild(eo);
+    GUBRE_LIST.forEach(function(g){
+      var o=document.createElement("option");
+      o.value=g.ad;o.textContent=g.ad+(g.stok?" ("+g.stok+")":"");
+      if(g.ad===k.ad)o.selected=true;
+      sel.appendChild(o);
+    });
+    sel.dataset.i=i;
+    sel.onchange=function(){karisim[this.dataset.i].ad=this.value;};
+    // Miktar
+    var inp=document.createElement("input");
+    inp.type="number";inp.min="0";inp.step="0.1";
+    inp.value=k.miktar||"";
+    inp.placeholder="Miktar";
+    inp.style.cssText=IST+"width:65px;";
+    inp.dataset.i=i;
+    inp.oninput=function(){karisim[this.dataset.i].miktar=parseFloat(this.value)||0;};
+    // Birim secimi
+    var bSel=document.createElement("select");
+    bSel.style.cssText=IST+"width:54px;";
+    BIRIMLER.forEach(function(b){
+      var o=document.createElement("option");
+      o.value=b.v;o.textContent=b.lbl;
+      if(b.v===(k.birim||"ml"))o.selected=true;
+      bSel.appendChild(o);
+    });
+    bSel.dataset.i=i;
+    bSel.onchange=function(){karisim[this.dataset.i].birim=this.value;};
+    // /agac etiketi
+    var pl=document.createElement("span");
+    pl.textContent="/ağaç";
+    pl.style.cssText="color:rgba(255,255,255,0.35);font-size:10px;flex-shrink:0;";
+    row.appendChild(lbl);row.appendChild(sel);
+    row.appendChild(inp);row.appendChild(bSel);row.appendChild(pl);
+    cont.appendChild(row);
+  });
+}
+function karisimKaydet(){
+  karisimPanelKapat();
+  kunyeGuncelle();
+}
+// GitHub Sync Fonksiyonlari
+function ghPanelAc(){
+  document.getElementById("gh-panel").style.display="flex";
+  document.getElementById("gh-kullanici").value=ghKullanici;
+  document.getElementById("gh-token").value=ghToken;
+  document.getElementById("gh-repo").value=ghRepo;
+}
+function ghPanelKapat(){
+  document.getElementById("gh-panel").style.display="none";
+}
+function ghAyarlariKaydet(){
+  ghKullanici=document.getElementById("gh-kullanici").value.trim();
+  ghToken=document.getElementById("gh-token").value.trim();
+  ghRepo=document.getElementById("gh-repo").value.trim();
+  localStorage.setItem("ghKullanici",ghKullanici);
+  localStorage.setItem("ghToken",ghToken);
+  localStorage.setItem("ghRepo",ghRepo);
+}
+function ghDurum(msg,renk){
+  var el=document.getElementById("gh-durum");
+  el.textContent=msg;
+  el.style.color=renk||"rgba(255,255,255,0.5)";
+}
+async function ghDosyaOku(dosya){
+  var url="https://api.github.com/repos/"+ghRepo+"/contents/"+dosya;
+  var r=await fetch(url,{headers:{"Authorization":"token "+ghToken,"Accept":"application/vnd.github.v3+json"}});
+  if(!r.ok) return null;
+  var j=await r.json();
+  return {icerik:JSON.parse(atob(j.content.replace(/\n/g,""))),sha:j.sha};
+}
+async function ghDosyaYaz(dosya,icerik,sha){
+  var url="https://api.github.com/repos/"+ghRepo+"/contents/"+dosya;
+  var body={message:"Guncellendi: "+dosya,content:btoa(unescape(encodeURIComponent(JSON.stringify(icerik,null,2))))};
+  if(sha) body.sha=sha;
+  var r=await fetch(url,{method:"PUT",headers:{"Authorization":"token "+ghToken,"Accept":"application/vnd.github.v3+json","Content-Type":"application/json"},body:JSON.stringify(body)});
+  return r.ok;
+}
+async function ghSyncKaydet(){
+  ghAyarlariKaydet();
+  if(!ghToken||!ghRepo){ghDurum("Token ve repo zorunlu!","#ff6b6b");return;}
+  ghDurum("Kaydediliyor...");
+  try{
+    // 1. Vana konumlari
+    var vanaSha=null;
+    var vanaOku=await ghDosyaOku("vana_kayit.json");
+    if(vanaOku) vanaSha=vanaOku.sha;
+    var vanaData={pos,gScale,gFont,gColor,islemTipi,karisim};
+    await ghDosyaYaz("vana_kayit.json",vanaData,vanaSha);
+    // 2. Gubre stok
+    var stokSha=null;
+    var stokOku=await ghDosyaOku("gubre_stok.json");
+    if(stokOku) stokSha=stokOku.sha;
+    await ghDosyaYaz("gubre_stok.json",GUBRE_LIST,stokSha);
+    // 3. Gubre gecmisi
+    var gecSha=null;
+    var gecOku=await ghDosyaOku("gubre_gecmisi.json");
+    if(gecOku) gecSha=gecOku.sha;
+    await ghDosyaYaz("gubre_gecmisi.json",gubreGecmisi,gecSha);
+    ghDurum("✓ GitHub'a kaydedildi!","#7fff7f");
+    toast("✓ GitHub'a kaydedildi!");
+  }catch(e){ghDurum("Hata: "+e.message,"#ff6b6b");}
+}
+async function ghSyncYukle(){
+  ghAyarlariKaydet();
+  if(!ghToken||!ghRepo){ghDurum("Token ve repo zorunlu!","#ff6b6b");return;}
+  ghDurum("Yükleniyor...");
+  try{
+    // 1. Vana konumlari
+    var vana=await ghDosyaOku("vana_kayit.json");
+    if(vana&&vana.icerik){
+      var d=vana.icerik;
+      if(d.pos) pos=d.pos;
+      if(d.gScale) gScale=d.gScale;
+      if(d.gFont) gFont=d.gFont;
+      if(d.gColor) gColor=d.gColor;
+      if(d.islemTipi) islemTipi=d.islemTipi;
+      if(d.karisim) karisim=d.karisim;
+      applyControls();render();
+      document.getElementById("islemSelect").value=islemTipi;
+      islemDegisti();
+    }
+    // 2. Gubre stok
+    var stok=await ghDosyaOku("gubre_stok.json");
+    if(stok&&Array.isArray(stok.icerik)){
+      GUBRE_LIST.length=0;
+      stok.icerik.forEach(function(g){GUBRE_LIST.push(g);});
+      gubreListesiDoldur();
+    }
+    // 3. Gubre gecmisi
+    var gec=await ghDosyaOku("gubre_gecmisi.json");
+    if(gec&&Array.isArray(gec.icerik)) gubreGecmisi=gec.icerik;
+    ghDurum("✓ Yüklendi!","#7fff7f");
+    toast("✓ GitHub'dan yüklendi!");
+  }catch(e){ghDurum("Hata: "+e.message,"#ff6b6b");}
+}
+// Gubre yapildi kaydi
+function gubreYapildi(){
+  var pinned=document.querySelector(".marker.pinned");
+  if(!pinned){toast("Once bir vana secin","r");return;}
+  var i=parseInt(pinned.dataset.i);
+  var v=pos[i];
+  var aktifler=karisim.filter(function(k){return k.ad&&k.miktar>0;});
+  if(!ghKullanici){toast("GitHub panelinden kullanıcı adı girin","r");return;}
+  // Stoktan dus - her urun icin toplam miktari hesapla
+  var stokUyari=[];
+  aktifler.forEach(function(k){
+    var g=GUBRE_LIST.find(function(x){return x.ad===k.ad;});
+    if(!g) return;
+    var b=BIRIMLER.find(function(x){return x.v===k.birim;})||BIRIMLER[0];
+    // Kullanilan toplam = agac sayisi * miktar/agac (ham birimde)
+    var kullanilanHam=v.a*k.miktar;
+    // Stok hangi birimde? Stok sayisini ayni birimde tut
+    // Stok = kalan adet/miktar (kullanici girdigi birimde)
+    var eskiStok=parseFloat(g.stok)||0;
+    var yeniStok=Math.max(0, eskiStok-kullanilanHam);
+    g.stok=parseFloat(yeniStok.toFixed(2));
+    if(g.stok===0) stokUyari.push(k.ad+" TÜKENDİ!");
+    else if(g.stok<kullanilanHam*2) stokUyari.push(k.ad+" KRİTİK ("+g.stok+")");
+  });
+  var kayit={
+    tarih:new Date().toLocaleString("tr-TR"),
+    kullanici:ghKullanici,
+    vana:"V"+v.v,
+    sira:v.s,
+    agac:v.a,
+    islem:islemTipi,
+    urunler:aktifler.map(function(k){
+      var sonuc=hesaplaToplamMiktar(k,v.a);
+      var g=GUBRE_LIST.find(function(x){return x.ad===k.ad;});
+      return {ad:k.ad,miktar:k.miktar,birim:k.birim,
+              toplam:sonuc.deger+" "+sonuc.birim,
+              kalanStok:g?g.stok:"-"};
+    })
+  };
+  gubreGecmisi.unshift(kayit);
+  if(gubreGecmisi.length>200) gubreGecmisi.length=200;
+  sonYapilanGoster(v.v);
+  if(stokUyari.length>0){
+    toast("⚠️ "+stokUyari.join(", "),"r");
+  } else {
+    toast("✅ V"+v.v+" kaydedildi! Stok guncellendi.");
+  }
+}
+// Stok durumu goster - kunye gecmis satirinda
+function stokDurumStr(g){
+  if(!g||g.stok===undefined) return "";
+  if(g.stok<=0) return " 🔴TÜKENDİ";
+  if(g.stok<10) return " 🟠KRİTİK("+g.stok+")";
+  return " ("+g.stok+")";
+}
+function sonYapilanGoster(vanaNo){
+  var ilgili=gubreGecmisi.filter(function(g){return g.vana==="V"+vanaNo;});
+  var el=document.getElementById("kp-son-yapilan");
+  if(ilgili.length>0){
+    var son=ilgili[0];
+    el.textContent="🕐 Son: "+son.tarih+" ("+son.kullanici+")";
+  } else {
+    el.textContent="Henüz kayıt yok";
+  }
+}
+function gecmisGoster(){
+  var pinned=document.querySelector(".marker.pinned");
+  var liste=document.getElementById("gecmis-liste");
+  liste.innerHTML="";
+  var vanaNo=pinned?"V"+pos[parseInt(pinned.dataset.i)].v:null;
+  var filtreli=vanaNo?gubreGecmisi.filter(function(g){return g.vana===vanaNo;}):gubreGecmisi;
+  if(filtreli.length===0){
+    liste.innerHTML='<div style="color:rgba(255,255,255,0.4);text-align:center;padding:20px;">Kayıt yok</div>';
+  } else {
+    filtreli.forEach(function(g){
+      var div=document.createElement("div");
+      div.className="gecmis-kayit";
+      var urunStr=g.urunler&&g.urunler.length>0
+        ?g.urunler.map(function(u){
+            var kalan=u.kalanStok!==undefined?" → Kalan:"+u.kalanStok:"";
+            return u.ad+": "+u.toplam+kalan;
+          }).join("<br>")
+        :"Sadece sulama";
+      div.innerHTML='<div class="gk-baslik">'+g.vana+' &mdash; '+g.kullanici+'</div>'
+        +'<div class="gk-detay">'+urunStr+'</div>'
+        +'<div class="gk-tarih">🕐 '+g.tarih+'</div>';
+      liste.appendChild(div);
+    });
+  }
+  document.getElementById("gecmis-modal").style.display="flex";
+}
+function gubreListesiDoldur(){
+  // GUBRE_LIST guncellendi, karisim paneli acilinca otomatik yuklenir
+  if(GUBRE_LIST.length>0) karisim.forEach(function(k){if(!k.ad)k.ad="";});
 }
 function drag(el,i){
   let sx,sy,spx,spy;
@@ -262,7 +738,7 @@ function rot(el,i){
 
 // SAVE / LOAD JSON
 function saveJSON(){
-  const data={pos,gScale,gFont,gColor};
+  const data={pos,gScale,gFont,gColor,islemTipi,karisim};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="vana_kayit.json";a.click();
   document.getElementById("saveModal").classList.add("open");
@@ -278,7 +754,13 @@ function loadJSON(e){
       if(data.gScale) gScale=data.gScale;
       if(data.gFont)  gFont=data.gFont;
       if(data.gColor) gColor=data.gColor;
+      if(data.islemTipi) islemTipi=data.islemTipi;
+      if(data.karisim) karisim=data.karisim;
       applyControls();render();
+      document.getElementById('islemSelect').value=islemTipi;
+      document.getElementById('gramInput').value=agacBasinaGram;
+      islemDegisti();
+
       toast("✓ Yüklendi!","g");
     }catch(err){toast("Hata: Geçersiz dosya","r");}
   };
@@ -310,7 +792,7 @@ function downloadMap(){
 
 function toast(msg,cls){const t=document.getElementById("toast");t.textContent=msg;t.className=cls;t.style.display="block";setTimeout(()=>t.style.display="none",3000);}
 
-img.addEventListener("load",()=>{zoomFit();applyControls();render();});
+img.addEventListener("load",()=>{gubreListesiDoldur();zoomFit();applyControls();render();});
 if(img.complete){zoomFit();applyControls();render();}
 window.addEventListener("resize",()=>{zoomFit();});
 </script>
