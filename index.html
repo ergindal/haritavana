@@ -51,7 +51,7 @@ body{font-family:Arial,sans-serif;background:#1a1a2e;color:#fff;overflow:hidden;
 #toast{position:fixed;bottom:20px;right:20px;padding:10px 18px;border-radius:8px;font-size:12px;display:none;z-index:9999;color:#fff;}
 #toast.g{background:#27ae60;}#toast.r{background:#c0392b;}
 
-#kunye-panel{position:fixed;top:64px;left:16px;z-index:9999;min-width:190px;background:linear-gradient(135deg,rgba(0,15,35,0.95) 0%,rgba(0,35,70,0.92) 100%);border:1px solid rgba(0,191,255,0.35);border-radius:14px;padding:14px 18px 12px;box-shadow:0 8px 32px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.07);display:none;pointer-events:none;font-family:Arial,sans-serif;}
+#kunye-panel{position:fixed;top:64px;left:16px;z-index:9999;min-width:190px;background:linear-gradient(135deg,rgba(0,15,35,0.95) 0%,rgba(0,35,70,0.92) 100%);border:1px solid rgba(0,191,255,0.35);border-radius:14px;padding:14px 18px 12px;box-shadow:0 8px 32px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.07);display:none;pointer-events:all;font-family:Arial,sans-serif;}
 #kunye-panel.visible{display:block;animation:kpIn 0.2s cubic-bezier(0.34,1.56,0.64,1);}
 @keyframes kpIn{from{opacity:0;transform:translate(-8px,-8px) scale(0.92);}to{opacity:1;transform:translate(0,0) scale(1);}}
 #kunye-panel .kp-label{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(0,191,255,0.6);font-weight:600;margin-bottom:8px;display:block;}
